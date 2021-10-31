@@ -114,8 +114,9 @@ def least_squares_GD(y, tx, initial_w, max_iters, gamma):
             print("[LS-GD] iter {}, loss = {}".format(n_iter, loss))
     return w, loss
 
-def least_squares_SGD(y, tx, initial_w, batch_size, max_iters, gamma):
+def least_squares_SGD(y, tx, initial_w, max_iters, gamma):
     """Stochastic gradient descent algorithm."""
+    batch_size = 1
     w = initial_w
     loss = -1
     min_loss = 1000
@@ -159,4 +160,32 @@ def ridge_regression(y, tx, lambda_):
     w = np.linalg.solve(A, b)
     return w, compute_loss_RMSE(y, tx, w)
 
-# Logistic regression to do, rewrite the gradient computing
+def cross_validation(y, x, k_indices, k):
+    """return the loss of ridge regression."""
+    
+    test_x = x[k_indices[k]]
+    test_y = y[k_indices[k]]
+    train_x = np.delete(x, k_indices[k], 0)
+    train_y = np.delete(y, k_indices[k], 0)
+    print("{}, {}, {}, {}".format(x.shape, len(k_indices), test_x.shape, train_x.shape))
+    
+    w_initial = np.zeros((train_x.shape[1], 1))
+    w, loss = least_squares_SGD(train_y, train_x, w_initial, 5000, 0.7)
+    
+    loss_tr = (2*compute_loss_RMSE(train_y, train_x, w))**0.5
+    loss_te = (2*compute_loss_RMSE(test_y, test_x, w))**0.5
+    return loss_tr, loss_te
+
+def full_cross_validation(y, x):
+    seed = 1
+    k_fold = 4
+    
+    k_indices = build_k_indices(y, k_fold, seed)
+    
+    temp_rmse_tr = 0
+    temp_rmse_te = 0
+    for i in range(k_fold):
+        temp_tr, temp_te = cross_validation(y, x, k_indices, i)
+        temp_rmse_tr += temp_tr
+        temp_rmse_te += temp_te
+    return temp_rmse_tr/k_fold, temp_rmse_te/k_fold
