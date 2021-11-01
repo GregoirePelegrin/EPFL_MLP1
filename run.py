@@ -12,12 +12,13 @@ y, tX, ids = load_csv_data(DATA_TRAIN_PATH)
 max_iters = 50000
 gamma = 0.7
 
-# Initialization
+# Initialization & feature augmentation
 std_tx = standardize(tX)
 std_tx = np.c_[std_tx, np.square(std_tx[:, 2])]
 std_y = np.asmatrix(y).T
 std_tx = np.c_[np.ones((std_tx.shape[0], 1)), std_tx]
 
+# ML algorithm
 def stochastic_gradient_descent(y, tx, max_iters, gamma):
     w_initial = np.zeros((tx.shape[1], 1))
     start_time = datetime.datetime.now()
@@ -32,6 +33,7 @@ def stochastic_gradient_descent(y, tx, max_iters, gamma):
 
 weights, loss = stochastic_gradient_descent(std_y, std_tx, max_iters, gamma)
 
+# Prediction generation
 DATA_TEST_PATH = '../data/test.csv'
 _, tX_test, ids_test = load_csv_data(DATA_TEST_PATH)
 
