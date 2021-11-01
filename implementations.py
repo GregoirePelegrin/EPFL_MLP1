@@ -189,3 +189,59 @@ def full_cross_validation(y, x):
         temp_rmse_tr += temp_tr
         temp_rmse_te += temp_te
     return temp_rmse_tr/k_fold, temp_rmse_te/k_fold
+
+def learning_by_gradient_descent_logistic_regression(y, tx, w, gamma):
+    """
+    Do one step of gradient descent using logistic regression.
+    Return the loss and the updated w.
+    """
+    loss = compute_loss_RMSE(y, tx, w)
+    gradient = compute_gradient_sigmoid(y, tx, w)
+    w = w - gamma*gradient 
+    return w, loss
+
+def logistic_regression(y, tx, initial_w, max_iters, gamma):
+    losses = []
+    w = initial_w
+    threshold = 1e-8
+    for iter in range(max_iters):
+        # get loss and update w.
+        w, loss = learning_by_gradient_descent_logistic_regression(y, tx, w, gamma)
+        # log info
+        if iter % 100 == 0:
+            print("Current iteration={i}, loss={l}".format(i=iter, l=loss))
+        # converge criterion
+        losses.append(loss)
+        if len(losses) > 1 and np.abs(losses[-1] - losses[-2]) < threshold:
+            break
+    return w, losses[-1]
+
+def learning_by_penalized_gradient_descent_logistic_regression(y, tx, w, gamma, lambda_):
+    """
+    Do one step of gradient descent, using the penalized logistic regression.
+    Return the loss and updated w.
+    """
+    correction = 0
+    for wi in w:
+        correction += wi**2
+    correction *= lambda_
+    loss = compute_loss_sigmoid(y, tx, w) + correction
+    gradient = compute_gradient_sigmoid(y, tx, w) + correction
+    w = w - gamma*gradient 
+    return w, loss
+
+def reg_logistic_regression(y, tx, lambda_, initial_w, max_iters, gamma):
+    losses = []
+    w = initial_w
+    threshold = 1e-8
+    for iter in range(max_iters):
+        # get loss and update w.
+        w, loss = learning_by_penalized_gradient_descent_logistic_regression(y, tx, w, gamma, lambda_)
+        # log info
+        if iter % 100 == 0:
+            print("Current iteration={i}, loss={l}".format(i=iter, l=loss))
+        # converge criterion
+        losses.append(loss)
+        if len(losses) > 1 and np.abs(losses[-1] - losses[-2]) < threshold:
+            break
+    return w, losses[-1]
