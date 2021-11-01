@@ -9,11 +9,12 @@ DATA_TRAIN_PATH = '../data/train.csv'
 y, tX, ids = load_csv_data(DATA_TRAIN_PATH)
 
 # Define the parameters of the algorithm.
-max_iters = 5000
+max_iters = 50000
 gamma = 0.7
 
 # Initialization
 std_tx = standardize(tX)
+std_tx = np.c_[std_tx, np.square(std_tx[:, 2])]
 std_y = np.asmatrix(y).T
 std_tx = np.c_[np.ones((std_tx.shape[0], 1)), std_tx]
 
@@ -36,6 +37,7 @@ _, tX_test, ids_test = load_csv_data(DATA_TEST_PATH)
 
 OUTPUT_PATH = '../data/output.csv'
 std_tX_test = standardize(tX_test)
+std_tX_test = np.c_[std_tX_test, np.square(std_tX_test[:, 2])]
 std_tX_test = np.c_[np.ones((std_tX_test.shape[0], 1)), std_tX_test]
 y_pred = predict_labels(weights, std_tX_test)
 create_csv_submission(ids_test, y_pred, OUTPUT_PATH)
